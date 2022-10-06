@@ -19,12 +19,12 @@ def score_a_question(
 
 
 def depth_first_support(
-    concepts: Dict[str, Union[str, float, List[any]]],
-    collected_supports: Dict[str, float],
+    knowledge_graph: Dict[str, Union[str, float, List[any]]],
+    leaf_concept_supports: Dict[str, float],
     questions: List[Dict[str, Union[str, float, List[any]]]],
 ) -> Dict[str, Union[str, float, List[any]]]:
 
-    concept, children = concepts["name"], concepts["children"]
+    concept, children = knowledge_graph["name"], knowledge_graph["children"]
 
     if not children:
         potential_support = 0.0
@@ -38,7 +38,7 @@ def depth_first_support(
         topic_support = 1.0
 
         if potential_support > 0:
-            topic_support = collected_supports[concept] / potential_support
+            topic_support = leaf_concept_supports[concept] / potential_support
 
         return {"support": topic_support, "name": concept, "children": []}
 
@@ -46,7 +46,7 @@ def depth_first_support(
     child_supports = []
 
     for child in children:
-        support = depth_first_support(child, collected_supports, questions)
+        support = depth_first_support(child, leaf_concept_supports, questions)
         child_supports.append(support)
 
         concept_support += support["support"] * child["weight"]
