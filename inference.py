@@ -4,32 +4,7 @@ import json
 
 from typing import Dict, List, Union
 
-KNOWLEDGE_WEB = {
-    "weight": 1.0,
-    "name": "harry potter",
-    "children": [
-        {
-            "weight": 0.33,
-            "name": "houses",
-            "children": [
-                {"weight": 0.25, "name": "gryffindor", "children": []},
-                {"weight": 0.25, "name": "huffelpuff", "children": []},
-                {"weight": 0.25, "name": "ravenclaw", "children": []},
-                {"weight": 0.25, "name": "slytherin", "children": []},
-            ],
-        },
-        {
-            "weight": 0.33,
-            "name": "media",
-            "children": [],
-        },
-        {
-            "weight": 0.33,
-            "name": "main characters",
-            "children": [],
-        },
-    ],
-}
+from knowledge_graph import KNOWLEDGE_GRAPH, leaf_concepts
 
 # "What is the color/animal/trait for Y"
 
@@ -79,22 +54,9 @@ def depth_first_support(
     return {"support": concept_support, "name": concept, "children": child_supports}
 
 
-def leaf_concepts(concept_tree: Dict[str, Union[str, float, List[any]]]) -> List[str]:
-    """Return leaf node names of knowledge web"""
-    if not concept_tree["children"]:
-        return [concept_tree["name"]]
-
-    child_leafs = []
-
-    for child in concept_tree["children"]:
-        child_leafs.extend(leaf_concepts(child))
-
-    return child_leafs
-
-
 if __name__ == "__main__":
 
-    collected_leaf_concept_scores = {h: 0.0 for h in leaf_concepts(KNOWLEDGE_WEB)}
+    collected_leaf_concept_scores = {h: 0.0 for h in leaf_concepts(KNOWLEDGE_GRAPH)}
     with open(
         os.path.join(os.path.dirname(__file__), "questions.json"), "r", encoding="utf8"
     ) as question_json:
@@ -138,7 +100,7 @@ if __name__ == "__main__":
             TESTING_FOR_QUESTIONS = False
 
     concept_scores = depth_first_support(
-        KNOWLEDGE_WEB, collected_leaf_concept_scores, questions
+        KNOWLEDGE_GRAPH, collected_leaf_concept_scores, questions
     )
 
     print("Concept scores:")
