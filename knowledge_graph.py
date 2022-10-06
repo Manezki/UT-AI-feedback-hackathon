@@ -18,12 +18,23 @@ KNOWLEDGE_GRAPH = {
         {
             "weight": 0.3333,
             "name": "media",
-            "children": [],
+            "children": [
+                {"weight": 0.45, "name": "books", "children": []},
+                {"weight": 0.45, "name": "movies", "children": []},
+                {"weight": 0.10, "name": "games", "children": []},
+            ],
         },
         {
             "weight": 0.3333,
             "name": "main characters",
-            "children": [],
+            "children": [
+                {"weight": 0.20, "name": "harry", "children": []},
+                {"weight": 0.20, "name": "hermione", "children": []},
+                {"weight": 0.20, "name": "ron", "children": []},
+                {"weight": 0.10, "name": "hagrid", "children": []},
+                {"weight": 0.15, "name": "voldemort", "children": []},
+                {"weight": 0.15, "name": "dumbledore", "children": []},
+            ],
         },
     ],
 }
