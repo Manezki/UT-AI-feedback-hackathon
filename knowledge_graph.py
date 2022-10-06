@@ -6,7 +6,7 @@ KNOWLEDGE_GRAPH = {
     "name": "harry potter",
     "children": [
         {
-            "weight": 0.33,
+            "weight": 0.3333,
             "name": "houses",
             "children": [
                 {"weight": 0.25, "name": "gryffindor", "children": []},
@@ -16,12 +16,12 @@ KNOWLEDGE_GRAPH = {
             ],
         },
         {
-            "weight": 0.33,
+            "weight": 0.3333,
             "name": "media",
             "children": [],
         },
         {
-            "weight": 0.33,
+            "weight": 0.3333,
             "name": "main characters",
             "children": [],
         },
