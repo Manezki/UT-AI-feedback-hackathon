@@ -1,0 +1,7 @@
+POST http://127.0.01:5000/knowledge-graph HTTP/1.1
+content-type: application/json
+
+[{
+    "id": 1,
+    "answer": "Gryffindor, Huffelpuff"
+}]
