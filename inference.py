@@ -2,7 +2,7 @@ import os
 import random
 import json
 
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 from knowledge_graph import KNOWLEDGE_GRAPH, leaf_concepts
 
@@ -52,6 +52,31 @@ def depth_first_support(
         concept_support += support["support"] * child["weight"]
 
     return {"support": concept_support, "name": concept, "children": child_supports}
+
+
+def score_item_suite(
+    questions_and_answers: List[Tuple[int, str]]
+) -> Dict[str, Union[str, float, List[any]]]:
+    collected_leaf_concept_scores = {h: 0.0 for h in leaf_concepts(KNOWLEDGE_GRAPH)}
+    asked_questions = []
+
+    with open(
+        os.path.join(os.path.dirname(__file__), "questions.json"), "r", encoding="utf8"
+    ) as questions_json:
+        question_bank = json.load(questions_json)
+
+    for question_id, answer in questions_and_answers:
+        for banked in question_bank:
+            if banked["id"] == question_id:
+                asked_questions.append(banked)
+
+                evidence = score_a_question(banked, answer)
+                for concept, support in evidence.items():
+                    collected_leaf_concept_scores[concept] += support
+
+    return depth_first_support(
+        KNOWLEDGE_GRAPH, collected_leaf_concept_scores, asked_questions
+    )
 
 
 if __name__ == "__main__":

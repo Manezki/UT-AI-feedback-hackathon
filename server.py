@@ -3,6 +3,8 @@ import json
 
 import flask
 
+from inference import score_item_suite
+
 app = flask.Flask(__name__)
 
 
@@ -27,3 +29,11 @@ def serve_questions():
     ]
 
     return json.dumps(deliverable_questions)
+
+
+@app.route("/knowledge-graph", methods=["POST"])
+def infer_knowledge_graph():
+    """Infers student's knowlege graph based on the question-answer pairs from the request"""
+    question_answer_pairs = flask.request.get_json()
+
+    return json.dumps(score_item_suite(question_answer_pairs))
