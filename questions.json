@@ -1,0 +1,29 @@
+[
+    {
+        "question": "For which houses are the following animals: Lion, Badger",
+        "correct": "Gryffindor, Huffelpuff",
+        "incorrects": [
+            "Gryffindor, Slytherin",
+            "Ravenclaw, Huffelpuff"
+        ],
+        "weights": {
+            "gryffindor": 0.5,
+            "huffelpuff": 0.5
+        }
+    },
+    {
+        "question": "Which of the houses has the trait 'Wit'",
+        "correct": "Ravenclaw",
+        "incorrects": [
+            "Gryffindor",
+            "Huffelpuff",
+            "Slytherin"
+        ],
+        "weights": {
+            "ravenclaw": 0.85,
+            "gryffindor": 0.05,
+            "huffelpuff": 0.05,
+            "slytherin": 0.05
+        }
+    }
+]

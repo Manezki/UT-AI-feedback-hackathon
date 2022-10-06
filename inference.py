@@ -1,3 +1,4 @@
+import os
 import random
 import json
 
@@ -32,29 +33,6 @@ KNOWLEDGE_WEB = {
 
 # "What is the color/animal/trait for Y"
 
-QUESTIONS = [
-    {
-        "question": "For which houses are the following animals: Lion, Badger",
-        "correct": "Gryffindor, Huffelpuff",
-        "incorrects": ["Gryffindor, Slytherin", "Ravenclaw, Huffelpuff"],
-        "weights": {
-            "gryffindor": 0.5,
-            "huffelpuff": 0.5,
-        },
-    },
-    {
-        "question": "Which of the houses has the trait 'Wit'",
-        "correct": "Ravenclaw",
-        "incorrects": ["Gryffindor", "Huffelpuff", "Slytherin"],
-        "weights": {
-            "ravenclaw": 0.85,
-            "gryffindor": 0.05,
-            "huffelpuff": 0.05,
-            "slytherin": 0.05,
-        },
-    },
-]
-
 
 def score_a_question(
     question: Dict[str, Union[str, List[str], Dict[str, float]]], answer: str
@@ -68,6 +46,7 @@ def score_a_question(
 def depth_first_support(
     concepts: Dict[str, Union[str, float, List[any]]],
     collected_supports: Dict[str, float],
+    questions: List[Dict[str, Union[str, float, List[any]]]],
 ) -> Dict[str, Union[str, float, List[any]]]:
 
     concept, children = concepts["name"], concepts["children"]
@@ -75,7 +54,7 @@ def depth_first_support(
     if not children:
         potential_support = 0.0
 
-        for question in QUESTIONS:
+        for question in questions:
             try:
                 potential_support += question["weights"][concept]
             except KeyError:
@@ -92,7 +71,7 @@ def depth_first_support(
     child_supports = []
 
     for child in children:
-        support = depth_first_support(child, collected_supports)
+        support = depth_first_support(child, collected_supports, questions)
         child_supports.append(support)
 
         concept_support += support["support"] * child["weight"]
@@ -116,8 +95,12 @@ def leaf_concepts(concept_tree: Dict[str, Union[str, float, List[any]]]) -> List
 if __name__ == "__main__":
 
     collected_leaf_concept_scores = {h: 0.0 for h in leaf_concepts(KNOWLEDGE_WEB)}
+    with open(
+        os.path.join(os.path.dirname(__file__), "questions.json"), "r", encoding="utf8"
+    ) as question_json:
+        questions = json.load(question_json)
 
-    for question in QUESTIONS:
+    for question in questions:
 
         TESTING_FOR_QUESTIONS = True
 
@@ -154,7 +137,9 @@ if __name__ == "__main__":
             print()
             TESTING_FOR_QUESTIONS = False
 
-    concept_scores = depth_first_support(KNOWLEDGE_WEB, collected_leaf_concept_scores)
+    concept_scores = depth_first_support(
+        KNOWLEDGE_WEB, collected_leaf_concept_scores, questions
+    )
 
     print("Concept scores:")
     print(json.dumps(concept_scores, indent=2))
