@@ -10,7 +10,7 @@ from knowledge_graph import KNOWLEDGE_GRAPH, leaf_concepts
 
 
 def score_a_question(
-    question: Dict[str, Union[str, List[str], Dict[str, float]]], answer: str
+    question: Dict[str, Union[int, str, List[str], Dict[str, float]]], answer: str
 ) -> Dict[str, float]:
     """Evaluates evidence towards a concept. Empty evidence suggests 0 evidence"""
     if answer == question["correct"]:
@@ -21,7 +21,7 @@ def score_a_question(
 def depth_first_support(
     knowledge_graph: Dict[str, Union[str, float, List[any]]],
     leaf_concept_supports: Dict[str, float],
-    questions: List[Dict[str, Union[str, float, List[any]]]],
+    questions: List[Dict[str, Union[int, str, float, List[any]]]],
 ) -> Dict[str, Union[str, float, List[any]]]:
 
     concept, children = knowledge_graph["name"], knowledge_graph["children"]
