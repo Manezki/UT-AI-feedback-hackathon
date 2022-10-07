@@ -97,17 +97,18 @@ if __name__ == "__main__":
     ) as question_json:
         questions = json.load(question_json)
 
+    questions_with_answers = []
+
     for question in questions:
 
         TESTING_FOR_QUESTIONS = True
 
         alternatives = [question["correct"]] + question["incorrects"]
         random.shuffle(alternatives)
-        ordered_alternatives = {i: a for i, a in enumerate(alternatives)}
 
         while TESTING_FOR_QUESTIONS:
             print(question["question"] + "\n")
-            for i, a in ordered_alternatives.items():
+            for i, a in enumerate(alternatives):
                 print(f"{i}: {a}")
 
             answer_number = input("Answer number: ")
@@ -121,26 +122,23 @@ if __name__ == "__main__":
                 continue
 
             try:
-                answer = ordered_alternatives[answer_number]
+                answer = alternatives[answer_number]
             except KeyError:
                 print(f"Answer number outside of range '{answer_number}'")
                 # Loop back to start
                 continue
 
-            evidence = score_a_question_beta(question, answer)
-            for concept, (neg_support, pos_support) in evidence.items():
-                existing_neg, existing_pos = collected_leaf_concept_scores[concept]
-                collected_leaf_concept_scores[concept] = (
-                    existing_neg + neg_support,
-                    existing_pos + pos_support,
-                )
+            questions_with_answers.append(
+                {
+                    "id": question["id"],
+                    "answer": answer,
+                }
+            )
 
             print()
             TESTING_FOR_QUESTIONS = False
 
-    concept_scores = depth_first_support(
-        KNOWLEDGE_GRAPH, collected_leaf_concept_scores, questions
-    )
+    student_knowledge_graph = score_item_suite(questions_with_answers)
 
-    print("Concept scores:")
-    print(json.dumps(concept_scores, indent=2))
+    print("Student knowledge graph:")
+    print(json.dumps(student_knowledge_graph, indent=2))
