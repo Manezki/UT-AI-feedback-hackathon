@@ -9,7 +9,16 @@ from knowledge_graph import KNOWLEDGE_GRAPH, leaf_concepts
 # "What is the color/animal/trait for Y"
 
 
-def score_a_question(
+def score_a_question_beta(
+    question: Dict[str, Union[int, str, List[str], Dict[str, float]]], answer: str
+) -> Dict[str, Tuple[float, float]]:
+    """Evaluates evidence towards a concept. With a Beta support."""
+    if answer == question["correct"]:
+        return {c: (0.0, w) for c, w in question["weights"].items()}
+    return {c: (w, 0.0) for c, w in question["weights"].items()}
+
+
+def score_a_question_naive(
     question: Dict[str, Union[int, str, List[str], Dict[str, float]]], answer: str
 ) -> Dict[str, float]:
     """Evaluates evidence towards a concept. Empty evidence suggests 0 evidence"""
@@ -27,18 +36,10 @@ def depth_first_support(
     concept, children = knowledge_graph["name"], knowledge_graph["children"]
 
     if not children:
-        potential_support = 0.0
 
-        for question in questions:
-            try:
-                potential_support += question["weights"][concept]
-            except KeyError:
-                pass
-
-        topic_support = 1.0
-
-        if potential_support > 0:
-            topic_support = leaf_concept_supports[concept] / potential_support
+        neg, pos = leaf_concept_supports[concept]
+        # Support from Beta mean
+        topic_support = pos / (neg + pos)
 
         return {"support": topic_support, "name": concept, "children": []}
 
@@ -57,7 +58,9 @@ def depth_first_support(
 def score_item_suite(
     questions_and_answers: List[Tuple[int, str]]
 ) -> Dict[str, Union[str, float, List[any]]]:
-    collected_leaf_concept_scores = {h: 0.0 for h in leaf_concepts(KNOWLEDGE_GRAPH)}
+    collected_leaf_concept_scores = {
+        h: (1.0, 1.0) for h in leaf_concepts(KNOWLEDGE_GRAPH)
+    }
     asked_questions = []
 
     with open(
@@ -65,14 +68,19 @@ def score_item_suite(
     ) as questions_json:
         question_bank = json.load(questions_json)
 
-    for question_id, answer in questions_and_answers:
+    for qa_dict in questions_and_answers:
+        question_id, answer = qa_dict["id"], qa_dict["answer"]
         for banked in question_bank:
             if banked["id"] == question_id:
                 asked_questions.append(banked)
 
-                evidence = score_a_question(banked, answer)
-                for concept, support in evidence.items():
-                    collected_leaf_concept_scores[concept] += support
+                evidence = score_a_question_beta(banked, answer)
+                for concept, (neg_support, pos_support) in evidence.items():
+                    existing_neg, existing_pos = collected_leaf_concept_scores[concept]
+                    collected_leaf_concept_scores[concept] = (
+                        existing_neg + neg_support,
+                        existing_pos + pos_support,
+                    )
 
     return depth_first_support(
         KNOWLEDGE_GRAPH, collected_leaf_concept_scores, asked_questions
@@ -81,7 +89,9 @@ def score_item_suite(
 
 if __name__ == "__main__":
 
-    collected_leaf_concept_scores = {h: 0.0 for h in leaf_concepts(KNOWLEDGE_GRAPH)}
+    collected_leaf_concept_scores = {
+        h: (1.0, 1.0) for h in leaf_concepts(KNOWLEDGE_GRAPH)
+    }
     with open(
         os.path.join(os.path.dirname(__file__), "questions.json"), "r", encoding="utf8"
     ) as question_json:
@@ -117,9 +127,13 @@ if __name__ == "__main__":
                 # Loop back to start
                 continue
 
-            evidence = score_a_question(question, answer)
-            for concept, concept_support in evidence.items():
-                collected_leaf_concept_scores[concept] += concept_support
+            evidence = score_a_question_beta(question, answer)
+            for concept, (neg_support, pos_support) in evidence.items():
+                existing_neg, existing_pos = collected_leaf_concept_scores[concept]
+                collected_leaf_concept_scores[concept] = (
+                    existing_neg + neg_support,
+                    existing_pos + pos_support,
+                )
 
             print()
             TESTING_FOR_QUESTIONS = False
